@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deploy Experiment</title>
+</head>
+<body>
+  <section id="form">
+    <form id="add-form">
+      Name:<br>
+      <input type="text" id="name-add"><br>
+      Description:<br>
+      <input type="text" id="desc-add"><br>
+      <button type="submit">Submit</button>
+    </form>
+  </section>
+  <section id="main-page">
+    <button id="add-button">Add Data</button>
+    <div id="list-data">
+
+    </div>
+  </section>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+  <script>
+    let basicUrl = "http://localhost:3000/"
+    function showPage(){
+      $("#form").hide()
+      $("#main-page").show()
+      showData()
+    }
+    function showData(){
+      $.ajax({
+        url: basicUrl,
+        method: "GET",
+      })
+      .then(response => {
+        $("#list-data").empty()
+        for(let i = 0; i < response.length; i++){
+          $("#list-data").prepend(`
+          <div><strong>${response[i].name}</strong></div>
+          <div>${response[i].description}</div><br>
+          `)
+        }
+      })
+    }
+
+    function addData(name, description){
+      $.ajax({
+        url: basicUrl,
+        method: "POST",
+        data: {
+          name,
+          description
+        }
+      })
+      .done(response => {
+        showPage()
+        console.log(response)
+      })
+      .fail(err => {
+        console.log(err)
+      })
+      .always(() => {
+        $("#name-add").val("")
+        $("#desc-add").val("")
+      })
+    }
+
+    $(document).ready(() => {
+      showPage()
+      $("#add-button").on("click", () => {
+        $("#form").toggle()
+      })
+      $("#add-form").on("submit" , (event) => {
+        event.preventDefault()
+        let newData = {
+          name: $("#name-add").val(),
+          description: $("#desc-add").val()
+        }
+        addData(newData.name, newData.description)
+
+      })
+    })
+  </script>
+</body>
+</html>
